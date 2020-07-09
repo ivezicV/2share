@@ -1,5 +1,5 @@
-# Materials for the "Predicting Asteroid Size Estimation" paper
-Vedrana's code and other material to reproduce analysis and figures from the Predicting Asteroid Size Estimation paper.
+# Materials for the "Asteroid Size Estimation with LSST data" paper
+Vedrana's code and other material to reproduce analysis and figures from the "Asteroid Size Estimation with LSST data" paper.
 Clone this repo, start analyzeSDSSWISE_IIpaper.ipynb as jupyter notebook, and if you have all the dependencies installed, you should be good to go!
 To verify correct running, compare your figures to the those linked below (in subdirectory Figures).
 
