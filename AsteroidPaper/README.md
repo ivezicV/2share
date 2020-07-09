@@ -1,5 +1,6 @@
 # Materials for Predicting Asteroid Size Estimation paper
-Vedrana's code and other material to reproduce analysis and figures from the Predicting Asteroid Size Estimation paper
+Vedrana's code and other material to reproduce analysis and figures from the Predicting Asteroid Size Estimation paper.
+Clone this repo, put all files in the same directory
 
 [Code to create analysis and figures used in paper](https://github.com/ivezicV/2share/blob/master/AsteroidPaper/analyzeSDSSWISE_IIpaper.ipynb)
 
