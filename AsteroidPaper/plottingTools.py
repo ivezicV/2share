@@ -1525,3 +1525,235 @@ def XDcontourplot(Teff, logg, FeH):
     plt.savefig("XDcountourplot.png", dpi=600)
     print('saved plot as:', "XDcountourplot.png")
     plt.show()
+
+
+
+def histCompare(Drat1, Drat2):
+
+    DPI = 300
+    SAVE_DIR = "../plots/"
+    FORMAT = "png"
+    SAVE_FIGS = False
+
+
+    histKwargs = {
+        "histtype" : "stepfilled",
+        "color" : "#718CA1",
+        "alpha" : 0.8, 
+        "normed" : True,
+    }
+    plotKwargs = {
+        "ls" : "-",
+        "lw" : 1,
+        "c" : "red"
+    }
+
+    plotKwargsComponents = {
+        "ls" : ":",
+        "lw" : 1,
+        "c" : "red",
+        "alpha" : 0.8
+    }
+
+    verticalLines = {
+        "lw" : 1,
+        "linestyle" : "--",
+    }
+
+
+    
+    fig, (ax1, ax2) = plt.subplots(1, 2, dpi=DPI, figsize=(5.5, 2.8))
+    fig.subplots_adjust(
+        # the left side of the subplots of the figure
+        left=0.12,  
+        # the right side of the subplots of the figure
+        right=0.95,
+        # the bottom of the subplots of the figure
+        bottom=0.17,
+        # the top of the subplots of the figure
+        top=0.95,
+        # the amount of width reserved for space between subplots,
+        # expressed as a fraction of the average axis width
+        wspace=0.35,   
+        # the amount of height reserved for space between subplots,
+        # expressed as a fraction of the average axis height
+        hspace=0.55)   
+ 
+    ax1, stats = plotHist(ax1, 
+                      Drat1, 
+                      [0.4, 1.6], 
+                      numGauss=1,
+                      bins=50,
+                      histKwargs=histKwargs,
+                      plotKwargs=plotKwargs,
+                      plotKwargsComponents=plotKwargsComponents)
+    ax1.set_xlabel("$D^{SDSS, MMI} / D^{ATM}$")
+    ax1.set_ylabel("n")
+    ax1.set_xlim(0.4, 1.6)
+    ax1.set_ylim(0, 3)
+    ax1.set_xticks(np.arange(0.4, 1.8, 0.2))
+    ax1.set_yticks(np.arange(0, 3.5, 0.5))
+    for gauss in [stats]:
+        print("mu : {:.3f}".format(gauss[0]))
+        print("sigma : {:.3f}".format(gauss[1]))
+        print("weight : {:.3f}".format(gauss[2]))
+        print("")
+        mu1 = gauss[0]
+        sig1 = gauss[1]
+        vv = Drat1
+        median = np.median(vv)
+        sG = sigG(vv)
+        xx = vv[(vv>median-2*sG)&(vv<median+2*sG)]
+        f95 = 100*np.size(xx)/np.size(vv)
+        ax1.text(1.18, 2.75, r"$\mu$: {:.3f}".format(median))
+        ax1.text(1.18, 2.50, r"$\sigma_G$: {:.3f}".format(sG))
+        ax1.text(1.18, 2.23, r"$f95$: {:.1f}".format(f95))
+    
+    ax2, stats = plotHist(ax2, 
+                      Drat2, 
+                      [0.4, 1.6], 
+                      numGauss=1,
+                      bins=50,
+                      histKwargs=histKwargs,
+                      plotKwargs=plotKwargs,
+                      plotKwargsComponents=plotKwargsComponents)
+    ax2.set_xlabel("$D^{SDSS, XD} / D^{ATM}$")
+    ax2.set_ylabel("n")
+    ax2.set_xlim(0.4, 1.6)
+    ax2.set_ylim(0, 3)
+    ax2.set_xticks(np.arange(0.4, 1.8, 0.2))
+    ax2.set_yticks(np.arange(0, 3.5, 0.5))
+    for gauss in [stats]:
+            print("mu : {:.3f}".format(gauss[0]))
+            print("sigma : {:.3f}".format(gauss[1]))
+            print("weight : {:.3f}".format(gauss[2]))
+            print("")
+            vv = Drat2
+            median = np.median(vv)
+            sG = sigG(vv)
+            xx = vv[(vv>median-2*sG)&(vv<median+2*sG)]
+            f95 = 100*np.size(xx)/np.size(vv)
+            ax2.text(1.18, 2.75, r"$\mu$: {:.3f}".format(median))
+            ax2.text(1.18, 2.50, r"$\sigma_G$: {:.3f}".format(sG))
+            ax2.text(1.18, 2.23, r"$f95$: {:.1f}".format(f95))
+    x = np.linspace(0, 2, 100)
+    G = 1/np.sqrt(2*np.pi)/sig1*np.exp(-(x-mu1)**2/2/sig1**2)
+    ax2.plot(x, G, '--b')
+    plt.savefig("MMIvsXDhist.png", dpi=600)
+    print('saved plot as:', "MMIvsXDhist.png")
+    plt.show()
+
+
+
+
+
+def histCompareSingle(Drat1, Drat2):
+
+    DPI = 300
+    SAVE_DIR = "../plots/"
+    FORMAT = "png"
+    SAVE_FIGS = False
+
+
+    histKwargs = {
+        "histtype" : "stepfilled",
+        "color" : "#718CA1",
+        "alpha" : 0.8, 
+        "normed" : True,
+    }
+    plotKwargs = {
+        "ls" : "-",
+        "lw" : 1,
+        "c" : "red"
+    }
+
+    plotKwargsComponents = {
+        "ls" : ":",
+        "lw" : 1,
+        "c" : "red",
+        "alpha" : 0.8
+    }
+
+    verticalLines = {
+        "lw" : 1,
+        "linestyle" : "--",
+    }
+
+
+    
+    fig, ax1 = plt.subplots(1, 1, dpi=DPI, figsize=(9.5, 9.5))
+    fig.subplots_adjust(
+        # the left side of the subplots of the figure
+        left=0.09,  
+        # the right side of the subplots of the figure
+        right=0.95,
+        # the bottom of the subplots of the figure
+        bottom=0.25,
+        # the top of the subplots of the figure
+        top=0.95,
+        # the amount of width reserved for space between subplots,
+        # expressed as a fraction of the average axis width
+        wspace=0.35,   
+        # the amount of height reserved for space between subplots,
+        # expressed as a fraction of the average axis height
+        hspace=0.55)   
+
+    ax1, stats = plotHist(ax1, 
+                      Drat1, 
+                      [0.4, 1.6], 
+                      numGauss=1,
+                      bins=50,
+                      histKwargs=histKwargs,
+                      plotKwargs={'ls': '-', 'c': "blue"},
+                      plotKwargsComponents={'ls': ':', 'c': "blue", 'alpha': 0.5})
+    ax1.set_xlabel("$D^{SDSS} / D^{ATM}$")
+    ax1.set_ylabel("n")
+    ax1.set_xlim(0.4, 1.6)
+    ax1.set_ylim(0, 3)
+    ax1.set_xticks(np.arange(0.4, 1.8, 0.2))
+    ax1.set_yticks(np.arange(0, 3.5, 0.5))
+    for gauss in [stats]:
+        print("mu : {:.3f}".format(gauss[0]))
+        print("sigma : {:.3f}".format(gauss[1]))
+        print("weight : {:.3f}".format(gauss[2]))
+        print("")
+        vv = Drat1
+        median = np.median(vv)
+        sG = sigG(vv)
+        xx = vv[(vv>median-2*sG)&(vv<median+2*sG)]
+        f95 = 100*np.size(xx)/np.size(vv)
+        ax1.text(1.18, 2.75, r"$\mu$: {:.3f}".format(median))
+        ax1.text(1.18, 2.50, r"$\sigma_G$: {:.3f}".format(sG))
+        ax1.text(1.18, 2.23, r"$f95$: {:.1f}".format(f95))
+    
+        ax2, stats = plotHist(ax1, 
+                      Drat2, 
+                      [0.4, 1.6], 
+                      numGauss=1,
+                      bins=50,
+                      histKwargs=histKwargs,
+                      plotKwargs=plotKwargs,
+                      plotKwargsComponents=plotKwargsComponents)
+        ax1.set_xlabel("$D^{SDSS} / D^{ATM}$")
+        ax1.set_ylabel("n")
+        ax1.set_xlim(0.4, 1.6)
+        ax1.set_ylim(0, 3)
+        ax1.set_xticks(np.arange(0.4, 1.8, 0.2))
+        ax1.set_yticks(np.arange(0, 3.5, 0.5))
+        for gauss in [stats]:
+            print("mu : {:.3f}".format(gauss[0]))
+            print("sigma : {:.3f}".format(gauss[1]))
+            print("weight : {:.3f}".format(gauss[2]))
+            print("")
+            vv = Drat2
+            median = np.median(vv)
+            sG = sigG(vv)
+            xx = vv[(vv>median-2*sG)&(vv<median+2*sG)]
+            f95 = 100*np.size(xx)/np.size(vv)
+            ax1.text(1.38, 2.75, r"$\mu$: {:.3f}".format(median))
+            ax1.text(1.38, 2.50, r"$\sigma_G$: {:.3f}".format(sG))
+            ax1.text(1.38, 2.23, r"$f95$: {:.1f}".format(f95))
+
+    plt.savefig("MMIvsXDhist.png", dpi=600)
+    print('saved plot as:', "MMIvsXDhist.png")
+    plt.show()
