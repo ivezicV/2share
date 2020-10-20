@@ -924,7 +924,7 @@ def quadPlotsOrigColors3(gr, ri, iz, pV, pVrat, drawXD = False, clf = 0):
 
 
 ## plotting code
-def twoPanelsPlot(df, kw): 
+def twoPanelsPlot(df, kw, plotShaded=False): 
 
     xVec1 = df[kw['Xstr1']]      
     yVec1 = df[kw['Ystr1']]
@@ -1007,7 +1007,15 @@ def twoPanelsPlot(df, kw):
     cbar.set_label(cLabel1, fontsize = 14)
     if ((kw['Xstr1']=='a')&(kw['Ystr1']=='i-z')):
         plotRegions(ax1)
-   
+
+    if (plotShaded):
+        ax1.plot([0.35, 0.80], [0.079, 0.307], ls='--', c='k') 
+        ax1.plot([0.48, 0.65], [0.317, -0.019], ls='--', c='k') 
+        dx = 0.03 
+        dy = dx*0.45/0.89
+        ax1.arrow(0.80-dx, 0.307-dy, dx, dy, width = 0.003)
+        ax1.text(0.785, 0.325, "a", fontsize = 18)
+
     # right subplot
     cbar_ax = fig.add_axes([0.58, 0.12, 0.37, 0.02])
     cbar_ax.xaxis.set_label_position('bottom')
@@ -1032,7 +1040,15 @@ def twoPanelsPlot(df, kw):
                  cax=cbar_ax,
                  orientation="horizontal")
     cbar.set_label(cLabel2, fontsize = 14)
-                 
+
+    if (plotShaded):
+        from matplotlib.collections import PatchCollection
+        from matplotlib.patches import Rectangle
+        rect1 = Rectangle((-0.15, -0.2), 0.10, 0.5)
+        rect2 = Rectangle((0.15, -0.2), 0.05, 0.5)
+        pc = PatchCollection([rect1, rect2], facecolor='gray', alpha=0.2, edgecolor='None')
+        ax2.add_collection(pc)
+   
     plt.savefig(kw['plotName'], dpi=600)
     print('saved plot as:', kw['plotName']) 
     plt.show()
@@ -1526,6 +1542,125 @@ def XDcontourplot(Teff, logg, FeH):
     print('saved plot as:', "XDcountourplot.png")
     plt.show()
 
+
+
+## extended version of XDcontourplot above: add the 4th panel with relative error 
+def XDcontourplot4panels(Teff, logg, FeH):
+    # cannibalized from https://www.astroml.org/examples/datasets/plot_SDSS_SSPP.html
+    #------------------------------------------------------------
+    # Plot the results using the binned_statistic function
+    from astroML.stats import binned_statistic_2d
+    N, xedges, yedges = binned_statistic_2d(Teff, logg, FeH,
+                                        'count', bins=100)
+    FeH_mean, xedges, yedges = binned_statistic_2d(Teff, logg, FeH,
+                                               'mean', bins=100)
+    
+    FeH_sigG, xedges, yedges = binned_statistic_2d(Teff, logg, FeH,
+                                               vat.sigG, bins=100)
+
+    # Define custom colormaps: Set pixels with no sources to white
+    cmap = plt.cm.jet
+    cmap.set_bad('w', 1.)
+
+    cmap_multicolor = plt.cm.jet
+    cmap_multicolor.set_bad('w', 1.)
+
+    # Create figure and subplots
+    fig= plt.figure(figsize=(12, 12))
+    fig.subplots_adjust(wspace=0.25, left=0.1, right=0.95,
+                    bottom=0.07, top=0.95)
+
+    #--------------------
+    fs = 18
+    # First axes:
+    ax1 = plt.subplot(221)
+    plt.imshow(np.log10(N.T), origin='lower',
+           extent=[xedges[0], xedges[-1], yedges[0], yedges[-1]],
+           aspect='auto', interpolation='nearest', cmap=cmap)
+    plt.xlim(xedges[0], xedges[-1])
+    plt.ylim(yedges[0], yedges[-1])
+    plt.xlabel('a', fontsize = fs)
+    plt.ylabel('i-z', fontsize = fs)
+
+    cb = plt.colorbar(ticks=[0, 1, 2, 3],
+                  format=r'$10^{%i}$', orientation='horizontal')
+    cb.set_label(r'$\mathrm{number\ in\ pixel}$', fontsize = fs)
+    plt.clim(0, 3)
+
+    #--------------------
+    # Second axes:
+    ax2 = plt.subplot(222)
+    plt.imshow(FeH_mean.T, origin='lower',
+           extent=[xedges[0], xedges[-1], yedges[0], yedges[-1]],
+           aspect='auto', interpolation='nearest', cmap=cmap_multicolor)
+    plt.xlim(xedges[0], xedges[-1])
+    plt.ylim(yedges[0], yedges[-1])
+    plt.xlabel('a', fontsize = fs)
+    plt.ylabel('i-z', fontsize = fs)
+
+    cb = plt.colorbar(ticks=np.arange(0, 0.301, 0.1),
+                  format=r'$%.1f$', orientation='horizontal')
+    cb.set_label(r'$\mathrm{mean\ p_V \ in\ pixel}$', fontsize = fs)
+    plt.clim(0, 0.3)
+
+    # Draw density contours over the colors
+    levels = np.linspace(0, np.log10(N.max()), 7)[2:]
+    plt.contour(np.log10(N.T), levels, colors='k', linewidths=1,
+            extent=[xedges[0], xedges[-1], yedges[0], yedges[-1]])
+
+    #--------------------
+    # Third axes:
+    ax3 = plt.subplot(223)
+    plt.imshow(FeH_sigG.T, origin='lower',
+           extent=[xedges[0], xedges[-1], yedges[0], yedges[-1]],
+           aspect='auto', interpolation='nearest', cmap=cmap_multicolor)
+    plt.xlim(xedges[0], xedges[-1])
+    plt.ylim(yedges[0], yedges[-1])
+    plt.xlabel('a', fontsize = fs)
+    plt.ylabel('i-z', fontsize = fs)
+
+    cb = plt.colorbar(ticks=np.arange(0, 0.101, 0.02),
+                  format=r'$%.2f$', orientation='horizontal')
+    cb.set_label(r'$\mathrm{\sigma_G(p_V) \ in\ pixel}$', fontsize = fs)
+    plt.clim(0.0, 0.1)
+    
+    # Draw density contours over the colors
+    levels = np.linspace(0, np.log10(N.max()), 7)[2:]
+    plt.contour(np.log10(N.T), levels, colors='k', linewidths=1,
+            extent=[xedges[0], xedges[-1], yedges[0], yedges[-1]])
+
+    #--------------------
+    # Fourth axes:
+    ax4 = plt.subplot(224)
+    Q = FeH_sigG.T/FeH_mean.T
+    plt.imshow(Q, origin='lower',
+           extent=[xedges[0], xedges[-1], yedges[0], yedges[-1]],
+           aspect='auto', interpolation='nearest', cmap=cmap_multicolor)
+    plt.xlim(xedges[0], xedges[-1])
+    plt.ylim(yedges[0], yedges[-1])
+    plt.xlabel('a', fontsize = fs)
+    plt.ylabel('i-z', fontsize = fs)
+
+    cb = plt.colorbar(ticks=np.arange(0, 0.801, 0.2),
+                  format=r'$%.2f$', orientation='horizontal')
+    cb.set_label(r'$\mathrm{\sigma_G(p_V)/p_V \ in\ pixel}$', fontsize = fs)
+    plt.clim(0.0, 0.8)
+    
+    # Draw density contours over the colors
+    levels = np.linspace(0, np.log10(N.max()), 7)[2:]
+    plt.contour(np.log10(N.T), levels, colors='k', linewidths=1,
+            extent=[xedges[0], xedges[-1], yedges[0], yedges[-1]])
+
+    plotRegions(ax1)
+    plotRegions(ax2)
+    plotRegions(ax3)
+    plotRegions(ax4)
+
+    plt.savefig("XDcountourplot4panels.png", dpi=600)
+    print('saved plot as:', "XDcountourplot4panels.png")
+    plt.show()
+
+    return 
 
 
 def histCompare(Drat1, Drat2):
