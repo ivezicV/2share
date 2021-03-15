@@ -1,4 +1,6 @@
 # Materials for the "Asteroid Size Estimation with LSST data" paper
+Published version: http://faculty.washington.edu/ivezic/Publications/IvezicIvezic2021.pdf
+
 Vedrana's code and other material to reproduce analysis and figures from the "Asteroid Size Estimation with LSST data" paper.
 Clone this repo, start analyzeSDSSWISE_IIpaper.ipynb as jupyter notebook, and if you have all the dependencies installed, you should be good to go!
 To verify correct running, compare your figures to the those linked below (in subdirectory Figures).
